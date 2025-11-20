@@ -1,31 +1,31 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
-import neon from './neon-vite-plugin.ts'
 
-const config = defineConfig({
-  plugins: [
-    devtools(),
-    neon,
-    // this is the plugin that enables path aliases
-    viteTsConfigPaths({
-      projects: ['./tsconfig.json'],
-    }),
-    tailwindcss(),
-    tanstackStart(),
-    viteReact(),
-  ],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8787',
-        changeOrigin: true,
+export default defineConfig(({ mode }) => {
+  // Load env file
+  const env = loadEnv(mode, process.cwd(), '')
+
+  return {
+    plugins: [
+      devtools(),
+      viteTsConfigPaths({
+        projects: ['./tsconfig.json'],
+      }),
+      tailwindcss(),
+      tanstackStart(),
+      viteReact(),
+    ],
+    server: {
+      proxy: {
+        '/api': {
+          target: env.VITE_API_URL, // ← pakai ENV
+          changeOrigin: true,
+        },
       },
     },
-  },
+  }
 })
-
-export default config
